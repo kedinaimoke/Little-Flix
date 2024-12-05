@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Little Flix</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <button id="dark-mode-toggle">Toggle Dark Mode</button>
+    <div class="container">
+        <h1>Little Flix</h1>
+        <form action="/recommendations" method="post">
+            <label for="title">Enter a movie title:</label>
+            <input type="text" id="title" name="title" value="{{ searched_title }}" required>
+            <button type="submit">Get Recommendations</button>
+        </form>
+        <div id="recommendations">
+            {{ recommendations | safe }}
+        </div>
+    </div>
+    <script>
+        const toggleButton = document.getElementById('dark-mode-toggle');
+        toggleButton.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+        document.getElementById('title').value = "{{ searched_title }}";
+    </script>
+</body>
+</html>
