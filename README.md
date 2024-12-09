@@ -29,7 +29,7 @@ Little Flix is a movie recommendation web application built with FastAPI. It all
 2. **Create a Virtual Environment**:
     ```sh
     python -m venv flixenv
-    flixenv\Scripts\activate   # On Linux use `flixenv\Scripts\activate source flixenv/bin/activate`
+    flixenv\Scripts\activate   # On Linux use `source flixenv/bin/activate`
     ```
 
 3. **Install the Dependencies**:
@@ -56,15 +56,16 @@ Little Flix is a movie recommendation web application built with FastAPI. It all
     - Open your web browser and navigate to `http://127.0.0.1:8000`.
 
 ## Project Structure
-little-flix/ 
-│ 
-├── main.py# FastAPI application code 
-├── requirements.txt# Python dependencies 
-├── .env # Environment variables 
-└── static/ 
-      ├── index.html# HTML template for the search page 
-      ├── results.html# HTML template for the results page 
-      ├── styles.css# CSS styles
+- little-flix/
+    - README.md: Application overview 
+    - main.py: FastAPI application code
+    - render.yaml: Render build components
+    - requirements.txt: Python dependencies
+    - start.sh: Shell script to start application
+    - static/
+        - index.html: HTML template for the search page
+        - results.html: HTML template for the results page
+        - styles.css: CSS styles
 
 
 ## Main Files
