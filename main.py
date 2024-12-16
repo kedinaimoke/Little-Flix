@@ -8,30 +8,17 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import re
 from fuzzywuzzy import process
-import requests
-import os
 
 app = FastAPI()
 
 templates = Jinja2Templates(directory="static")
 
-API_KEY = os.getenv("TMDB_API_KEY")
-URL = f"https://api.themoviedb.org/3/movie/550?api_key={API_KEY}" 
-
-headers = { 
-    "Authorization": f"Bearer {API_KEY}" 
-    }
-
-response = requests.get(URL, headers=headers) 
-data = response.json() 
-print(data)
-
 def load_movie_data():
-    movies_df = pd.read_csv("https://drive.google.com/file/d/1fFyrjeTwxUIN-NoKVMo-GIK3q1gKbLEJ/view?usp=drive_link")
+    movies_df = pd.read_csv("movies.csv")
     return movies_df
 
 def load_ratings_data():
-    ratings_df = pd.read_csv("https://drive.google.com/file/d/159nMONyTiqDVaEgzVda6kjoTkg4t5DnU/view?usp=drive_link")
+    ratings_df = pd.read_csv("ratings.csv")
     return ratings_df
 
 movies_df = load_movie_data()
@@ -99,40 +86,6 @@ def scores_calculator(movie_id):
     rec_percentages = rec_percentages.sort_values('score', ascending=False)
     return rec_percentages
 
-def fetch_movie_details(title):
-    URL = f"https://api.themoviedb.org/3/search/movie?query={title}&api_key={API_KEY}"
-    response = requests.get(URL)
-    data = response.json()
-    
-    print(data)
-    
-    if 'results' not in data or not data['results']:
-        return {
-            'poster': 'https://via.placeholder.com/100',
-            'synopsis': 'No synopsis available.',
-            'director': 'Unknown',
-            'cast': 'Unknown',
-            'rating': 'N/A'
-        }
-    
-    movie = data['results'][0]
-    movie_id = movie['id']
-    
-    details_url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={API_KEY}&append_to_response=credits"
-    details_response = requests.get(details_url)
-    details_data = details_response.json()
-    
-    director = next((member['name'] for member in details_data['credits']['crew'] if member['job'] == 'Director'), 'Unknown')
-    cast = ', '.join([member['name'] for member in details_data['credits']['cast'][:5]])
-    
-    return {
-        'poster': f"https://image.tmdb.org/t/p/w500{movie['poster_path']}" if movie['poster_path'] else 'https://via.placeholder.com/100',
-        'synopsis': movie['overview'],
-        'director': director,
-        'cast': cast,
-        'rating': movie['vote_average']
-    }
-
 def recommendation_results(user_input, title=0):
     title_candidates = search_by_title(user_input)
     movie_id = title_candidates.iloc[title]['movieId']
@@ -168,17 +121,11 @@ async def get_recommendations(request: Request):
 
     recommendations_html = f"<p>Showing results for: <strong>{corrected_title}</strong></p>"
     for _, row in recommendations.iterrows():
-        movie_details = fetch_movie_details(row['title'])
         google_search_url = f"https://www.google.com/search?q={row['title'].replace(' ', '+')}+movie"
         recommendations_html += f"""
         <div class="recommendation-card">
-            <img src="{movie_details['poster']}" alt="{row['title']} poster" class="movie-poster">
             <div class="movie-title"><a href="{google_search_url}" target="_blank">{row['title']}</a></div>
             <div class="movie-genres">Genres: {row['genres']}</div>
-            <div class="movie-synopsis">Synopsis: {movie_details['synopsis']}</div>
-            <div class="movie-director">Director: {movie_details['director']}</div>
-            <div class="movie-cast">Cast: {movie_details['cast']}</div>
-            <div class="movie-rating">Rating: {movie_details['rating']}</div>
         </div>
         """
     
